@@ -1,0 +1,97 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false # Disable default /service-id/ routes
+          lower-case-service-id: true
+      routes:
+        # --- Identity Service ---
+        - id: identity-auth
+          uri: lb://IDENTITY-SERVICE
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=2 # Remove /api/v1
+
+        - id: identity-users
+          uri: lb://IDENTITY-SERVICE
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - StripPrefix=2 # Remove /api/v1
+
+        # --- Product Service ---
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/products/**, /api/v1/categories/**
+          filters:
+            - StripPrefix=2
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+
+        # --- Order Service ---
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+        # --- Inventory Service ---
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - Authorization
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  secret: YmVlZHVTZWNyZXRLZXkxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=
+  expiration: 86400000
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
