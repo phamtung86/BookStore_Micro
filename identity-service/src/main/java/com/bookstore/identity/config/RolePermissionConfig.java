@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Maps roles to their permissions
- */
 public class RolePermissionConfig {
 
     public static Set<Permission> getPermissionsForRole(UserRole role) {
@@ -32,30 +29,52 @@ public class RolePermissionConfig {
 
                     Permission.VIEW_INVENTORY,
                     Permission.UPDATE_INVENTORY,
-                    
-                    // Admin permissions
+
+                    Permission.VIEW_PAYMENT,
+                    Permission.PROCESS_REFUND,
+
+                    Permission.CREATE_PROMOTION,
+                    Permission.UPDATE_PROMOTION,
+                    Permission.DELETE_PROMOTION,
+                    Permission.VIEW_PROMOTION,
+
+                    Permission.CREATE_NOTIFICATION,
+                    Permission.VIEW_NOTIFICATION,
+
                     Permission.MANAGE_ROLES,
                     Permission.VIEW_REPORTS,
-                    Permission.MANAGE_SETTINGS
-            ));
-            
-            case USER -> new HashSet<>(Arrays.asList(
+                    Permission.MANAGE_SETTINGS));
+
+            case SELLER -> new HashSet<>(Arrays.asList(
                     Permission.VIEW_USER,
                     Permission.UPDATE_USER,
 
+                    Permission.CREATE_PRODUCT,
+                    Permission.UPDATE_PRODUCT,
                     Permission.VIEW_PRODUCT,
+                    Permission.DELETE_PRODUCT,
 
-                    Permission.CREATE_ORDER,
-                    Permission.VIEW_OWN_ORDERS,
-                    Permission.CANCEL_ORDER
-            ));
-            
+                    Permission.VIEW_ALL_ORDERS,
+                    Permission.UPDATE_ORDER_STATUS,
+
+                    Permission.VIEW_INVENTORY,
+                    Permission.UPDATE_INVENTORY,
+
+                    Permission.VIEW_PAYMENT,
+
+                    Permission.CREATE_PROMOTION,
+                    Permission.UPDATE_PROMOTION,
+                    Permission.VIEW_PROMOTION,
+
+                    Permission.VIEW_NOTIFICATION));
+
             case CUSTOMER -> new HashSet<>(Arrays.asList(
                     Permission.VIEW_PRODUCT,
                     Permission.CREATE_ORDER,
                     Permission.VIEW_OWN_ORDERS,
-                    Permission.CANCEL_ORDER
-            ));
+                    Permission.CANCEL_ORDER,
+                    Permission.VIEW_PROMOTION,
+                    Permission.VIEW_NOTIFICATION));
         };
     }
 }

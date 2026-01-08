@@ -6,56 +6,97 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: false # Disable default /service-id/ routes
+          enabled: false
           lower-case-service-id: true
       routes:
-        # --- Identity Service ---
-        - id: identity-auth
+        # ========================================
+        # PUBLIC ROUTES (No Authentication Required)
+        # ========================================
+        
+        # Auth endpoints - Login, Register, Refresh Token
+        - id: identity-auth-public
           uri: lb://IDENTITY-SERVICE
           predicates:
             - Path=/api/v1/auth/**
           filters:
-            - StripPrefix=2 # Remove /api/v1
+            - StripPrefix=2
 
+        # Public product catalog (for browsing)
+        - id: product-public
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/api/v1/products/public/**, /api/v1/categories/**
+            - Method=GET
+          filters:
+            - StripPrefix=2
+
+
+        # Identity Service - User management
         - id: identity-users
           uri: lb://IDENTITY-SERVICE
           predicates:
             - Path=/api/v1/users/**
           filters:
-            - StripPrefix=2 # Remove /api/v1
-
-        # --- Product Service ---
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/api/v1/products/**, /api/v1/categories/**
-          filters:
             - StripPrefix=2
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
+            - AuthenticationFilter
 
-        # --- Order Service ---
-        - id: order-service
-          uri: lb://order-service
+        # Product Service - Product management (admin)
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=/api/v1/orders/**
+            - Path=/api/v1/products/**
           filters:
             - StripPrefix=2
             - AuthenticationFilter
 
-        # --- Inventory Service ---
-        - id: inventory-service
-          uri: lb://inventory-service
+        # Order Service
+        - id: order-service
+          uri: lb://ORDER-SERVICE
           predicates:
-            - Path=/api/v1/inventory/**
+            - Path=/api/v1/orders/**, /api/v1/cart/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+        # Inventory Service
+        - id: inventory-service
+          uri: lb://INVENTORY-SERVICE
+          predicates:
+            - Path=/api/v1/inventory/**, /api/v1/warehouses/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+        # Payment Service
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/v1/payments/**, /api/v1/refunds/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+        # Promotion Service
+        - id: promotion-service
+          uri: lb://PROMOTION-SERVICE
+          predicates:
+            - Path=/api/v1/promotions/**, /api/v1/coupons/**, /api/v1/flash-sales/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+        # Notification Service
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/v1/notifications/**
           filters:
             - StripPrefix=2
             - AuthenticationFilter
 
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -65,10 +106,13 @@ spring:
               - POST
               - PUT
               - DELETE
+              - PATCH
               - OPTIONS
             allowedHeaders: "*"
             exposedHeaders:
               - Authorization
+              - X-User-Id
+              - X-User-Role
 
 eureka:
   client:
@@ -95,3 +139,4 @@ jwt:
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+    com.bookstore.gateway: DEBUG

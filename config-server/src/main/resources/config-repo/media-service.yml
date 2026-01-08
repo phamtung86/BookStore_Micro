@@ -1,0 +1,76 @@
+server:
+  port: 8086
+
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: myuser
+    password: mypassword
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3000ms # Đợi 3 giây rồi thử lại
+          max-attempts: 3           # Thử tối đa 3 lần
+          multiplier: 2.0          # Lần sau đợi lâu gấp đôi lần trước (3s, 6s, 12s)
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+
+# Cloudinary Configuration
+cloudinary:
+  cloud-name: dspqk9rl9
+  api-key: 547813551859918
+  api-secret: 2jtW5H1IMaT5wG_67k3vNqDNAp8
+  secure: true
+
+# Media Processing Configuration
+media:
+  image:
+    max-size: 10MB
+    allowed-types: image/jpeg,image/png,image/gif,image/webp
+    thumbnail:
+      width: 200
+      height: 200
+  video:
+    max-size: 500MB
+    allowed-types: video/mp4,video/webm,video/quicktime
+  document:
+    max-size: 50MB
+    allowed-types: application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  excel:
+    max-size: 20MB
+    allowed-types: application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+    tracing:
+      sampling:
+        probability: 1.0  # 100% sampling for dev, reduce in production
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+logging:
+  level:
+    com.bookstore.media: DEBUG
+    org.springframework.amqp: INFO

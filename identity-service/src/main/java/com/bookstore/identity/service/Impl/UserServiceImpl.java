@@ -69,7 +69,7 @@ public class UserServiceImpl implements IUserService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .enabled(user.isEnabled())
+                .enabled(Boolean.TRUE.equals(user.getEnabled()))
                 .createdAt(user.getCreatedAt())
                 .permissions(permissions)
                 .build();

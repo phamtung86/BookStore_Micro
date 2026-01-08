@@ -29,12 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.isEnabled(),
+                Boolean.TRUE.equals(user.getEnabled()),
                 true,
                 true,
                 true,
-                getAuthorities(user)
-        );
+                getAuthorities(user));
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
@@ -42,10 +41,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
-        RolePermissionConfig.getPermissionsForRole(user.getRole()).forEach(permission -> 
-            authorities.add(new SimpleGrantedAuthority(permission.name()))
-        );
-        
+        RolePermissionConfig.getPermissionsForRole(user.getRole())
+                .forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.name())));
+
         return authorities;
     }
 }

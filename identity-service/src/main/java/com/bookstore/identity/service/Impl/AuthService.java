@@ -7,10 +7,13 @@ import com.bookstore.identity.dto.LoginResponse;
 import com.bookstore.identity.dto.RegisterRequest;
 import com.bookstore.identity.dto.UserDTO;
 import com.bookstore.identity.entity.User;
+import com.bookstore.identity.entity.UserLoginHistory;
 import com.bookstore.identity.entity.UserRole;
 import com.bookstore.identity.repository.UserRepository;
 import com.bookstore.identity.service.IAuthService;
 import com.bookstore.identity.service.IJwtService;
+import com.bookstore.identity.service.IUserLoginHistoryService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,8 +29,10 @@ import java.util.stream.Collectors;
 public class AuthService implements IAuthService {
 
     private final UserRepository userRepository;
+    private final IUserLoginHistoryService userLoginHistoryService;
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
+
 
     @Override
     @Transactional
@@ -52,26 +57,39 @@ public class AuthService implements IAuthService {
                 .build();
 
         User savedUser = userRepository.save(user);
-        log.info("User registered successfully: {}", savedUser.getUsername());
-
         return mapToDTO(savedUser);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest request) {
+    @Transactional
+    public LoginResponse login(LoginRequest request, HttpServletRequest httpRequest) {
         log.info("Login attempt for user: {}", request.getUsername());
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new BusinessException("Invalid username or password"));
+        String ipAddress = extractIpAddress(httpRequest);
+        String userAgent = httpRequest.getHeader("User-Agent");
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        User user = userRepository.findByUsername(request.getUsername()).orElse(null);
+
+        if (user == null) {
+            log.warn("Login failed - user not found: {}", request.getUsername());
             throw new BusinessException("Invalid username or password");
         }
 
-        if (!user.isEnabled()) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            userLoginHistoryService.saveLoginHistory(user, ipAddress, userAgent,
+                    UserLoginHistory.LoginStatus.FAILED, "Invalid password");
+            log.warn("Login failed - invalid password for user: {}", request.getUsername());
+            throw new BusinessException("Invalid username or password");
+        }
+
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
+            userLoginHistoryService.saveLoginHistory(user, ipAddress, userAgent,
+                    UserLoginHistory.LoginStatus.BLOCKED, "Account disabled");
             throw new BusinessException("Account is disabled");
         }
+
+        userLoginHistoryService.saveLoginHistory(user, ipAddress, userAgent,
+                UserLoginHistory.LoginStatus.SUCCESS, null);
 
         Set<String> permissions = RolePermissionConfig.getPermissionsForRole(user.getRole())
                 .stream()
@@ -82,12 +100,9 @@ public class AuthService implements IAuthService {
                 user.getUsername(),
                 user.getRole().name(),
                 user.getId(),
-                permissions
-        );
+                permissions);
 
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
-
-        log.info("User logged in successfully: {}", user.getUsername());
 
         return LoginResponse.builder()
                 .token(accessToken)
@@ -101,10 +116,30 @@ public class AuthService implements IAuthService {
                 .build();
     }
 
+    private String extractIpAddress(HttpServletRequest request) {
+        String[] headers = {
+                "X-Forwarded-For",
+                "X-Real-IP",
+                "Proxy-Client-IP",
+                "WL-Proxy-Client-IP",
+                "HTTP_CLIENT_IP",
+                "HTTP_X_FORWARDED_FOR"
+        };
+
+        for (String header : headers) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                return ip.split(",")[0].trim();
+            }
+        }
+
+        return request.getRemoteAddr();
+    }
+
+
     @Override
     @Transactional(readOnly = true)
     public LoginResponse refreshToken(String refreshToken) {
-        log.info("Refresh token request");
 
         try {
             String username = jwtService.extractUsername(refreshToken);
@@ -117,7 +152,7 @@ public class AuthService implements IAuthService {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new BusinessException("User not found"));
 
-            if (!user.isEnabled()) {
+            if (!Boolean.TRUE.equals(user.getEnabled())) {
                 throw new BusinessException("Account is disabled");
             }
 
@@ -134,12 +169,9 @@ public class AuthService implements IAuthService {
                     user.getUsername(),
                     user.getRole().name(),
                     user.getId(),
-                    permissions
-            );
+                    permissions);
 
             String newRefreshToken = jwtService.generateRefreshToken(user.getUsername());
-
-            log.info("Token refreshed successfully for user: {}", user.getUsername());
 
             return LoginResponse.builder()
                     .token(newAccessToken)
@@ -170,7 +202,7 @@ public class AuthService implements IAuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
-                .enabled(user.isEnabled())
+                .enabled(Boolean.TRUE.equals(user.getEnabled()))
                 .createdAt(user.getCreatedAt())
                 .permissions(permissions)
                 .build();
