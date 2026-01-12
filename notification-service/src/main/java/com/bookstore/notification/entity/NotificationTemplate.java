@@ -25,7 +25,7 @@ public class NotificationTemplate {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String code; // e.g., ORDER_CREATED, ORDER_SHIPPED, WELCOME
+    private String code;
 
     @Column(nullable = false, length = 150)
     private String name;

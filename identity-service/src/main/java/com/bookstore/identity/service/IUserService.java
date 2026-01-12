@@ -1,11 +1,13 @@
 package com.bookstore.identity.service;
 
-import com.bookstore.identity.dto.UserDTO;
-import java.util.List;
+import com.bookstore.common.dto.response.ServiceResponse;
 
 public interface IUserService {
-    List<UserDTO> getAllUsers();
-    UserDTO getUserById(Long id);
-    UserDTO getMyProfile();
-    void deleteUser(Long id);
+    ServiceResponse getAllUsers();
+
+    ServiceResponse getUserById(Long id);
+
+    ServiceResponse getMyProfile();
+
+    ServiceResponse deleteUser(Long id);
 }

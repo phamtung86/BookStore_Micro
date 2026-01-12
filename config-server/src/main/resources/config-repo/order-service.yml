@@ -16,10 +16,18 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
   rabbitmq:
-    host: localhost
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
-    username: admin
-    password: admin123
+    username: myuser
+    password: mypassword
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3000ms # Đợi 3 giây rồi thử lại
+          max-attempts: 3           # Thử tối đa 3 lần
+          multiplier: 2.0          # Lần sau đợi lâu gấp đôi lần trước (3s, 6s, 12s)
+
 
 eureka:
   client:

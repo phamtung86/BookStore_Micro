@@ -25,7 +25,7 @@ public class Wishlist {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId; // Reference to identity_db.users
+    private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)

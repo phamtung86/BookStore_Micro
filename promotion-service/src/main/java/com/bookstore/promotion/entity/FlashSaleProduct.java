@@ -27,7 +27,7 @@ public class FlashSaleProduct {
     private FlashSale flashSale;
 
     @Column(name = "product_id", nullable = false)
-    private Long productId; // Reference to product_db.products
+    private Long productId;
 
     @Column(name = "flash_sale_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal flashSalePrice;
@@ -36,7 +36,7 @@ public class FlashSaleProduct {
     private BigDecimal originalPrice;
 
     @Column(name = "quantity_limit", nullable = false)
-    private Integer quantityLimit; // Limited quantity for sale
+    private Integer quantityLimit;
 
     @Column(name = "quantity_sold")
     @Builder.Default
@@ -46,7 +46,6 @@ public class FlashSaleProduct {
     @Builder.Default
     private Integer perUserLimit = 1;
 
-    // Helper methods
     public int getAvailableQuantity() {
         return quantityLimit - quantitySold;
     }

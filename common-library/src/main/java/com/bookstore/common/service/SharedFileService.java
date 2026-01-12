@@ -1,6 +1,7 @@
 package com.bookstore.common.service;
 
 import com.bookstore.common.file.FileType;
+import com.bookstore.common.messaging.FileDeleteMessage;
 import com.bookstore.common.messaging.FileUploadMessage;
 import com.bookstore.common.messaging.RabbitMQConstants;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import java.util.UUID;
 public class SharedFileService {
 
     private final RabbitTemplate rabbitTemplate;
-
 
     public String uploadFile(MultipartFile file, FileType fileType, Long entityId, String sourceService) {
         return uploadFile(file, fileType, entityId, sourceService, null);
@@ -52,6 +52,25 @@ public class SharedFileService {
         } catch (IOException e) {
             log.error("Failed to read file content", e);
             throw new RuntimeException("Failed to prepare file for upload", e);
+        }
+    }
+
+    public void deleteFile(String fileUrl, String sourceService, Long deletedBy) {
+        try {
+            FileDeleteMessage message = FileDeleteMessage.builder()
+                    .fileUrl(fileUrl)
+                    .sourceService(sourceService)
+                    .deletedBy(deletedBy)
+                    .build();
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConstants.FILE_EXCHANGE,
+                    RabbitMQConstants.FILE_DELETE_ROUTING_KEY,
+                    message);
+
+            log.info("Sent delete file request for: {}", fileUrl);
+        } catch (Exception e) {
+            log.error("Failed to send delete file request", e);
         }
     }
 }

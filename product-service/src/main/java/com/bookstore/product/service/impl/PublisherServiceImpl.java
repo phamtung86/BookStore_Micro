@@ -1,5 +1,6 @@
 package com.bookstore.product.service.impl;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.common.exception.BusinessException;
 import com.bookstore.product.dto.request.CreatePublisherRequest;
 import com.bookstore.product.dto.publisher.PublisherDTO;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -24,8 +26,14 @@ public class PublisherServiceImpl implements IPublisherService {
     private final PublisherRepository publisherRepository;
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Publisher> findById(Long id) {
+        return publisherRepository.findById(id);
+    }
+
+    @Override
     @Transactional
-    public PublisherDTO createPublisher(CreatePublisherRequest request) {
+    public ServiceResponse createPublisher(CreatePublisherRequest request) {
         log.info("Creating publisher: {}", request.getName());
 
         if (publisherRepository.existsByName(request.getName())) {
@@ -49,40 +57,43 @@ public class PublisherServiceImpl implements IPublisherService {
         Publisher saved = publisherRepository.save(publisher);
         log.info("Publisher created: {} (ID: {})", saved.getName(), saved.getId());
 
-        return mapToDTO(saved);
+        return ServiceResponse.RESPONSE_SUCCESS("Publisher created successfully", mapToDTO(saved));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PublisherDTO getPublisherById(Long id) {
+    public ServiceResponse getPublisherById(Long id) {
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Publisher not found: " + id));
-        return mapToDTO(publisher);
+        return ServiceResponse.RESPONSE_SUCCESS(mapToDTO(publisher));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PublisherDTO getPublisherBySlug(String slug) {
+    public ServiceResponse getPublisherBySlug(String slug) {
         Publisher publisher = publisherRepository.findBySlug(slug)
                 .orElseThrow(() -> new BusinessException("Publisher not found: " + slug));
-        return mapToDTO(publisher);
+        return ServiceResponse.RESPONSE_SUCCESS(mapToDTO(publisher));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PublisherDTO> getAllPublishers(Pageable pageable) {
-        return publisherRepository.findAll(pageable).map(this::mapToDTO);
+    public ServiceResponse getAllPublishers(Pageable pageable) {
+        Page<PublisherDTO> publishers = publisherRepository.findAll(pageable).map(this::mapToDTO);
+        return ServiceResponse.RESPONSE_SUCCESS(publishers);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PublisherDTO> searchPublishers(String keyword, Pageable pageable) {
-        return publisherRepository.findByNameContainingIgnoreCase(keyword, pageable).map(this::mapToDTO);
+    public ServiceResponse searchPublishers(String keyword, Pageable pageable) {
+        Page<PublisherDTO> publishers = publisherRepository.findByNameContainingIgnoreCase(keyword, pageable)
+                .map(this::mapToDTO);
+        return ServiceResponse.RESPONSE_SUCCESS(publishers);
     }
 
     @Override
     @Transactional
-    public PublisherDTO updatePublisher(Long id, CreatePublisherRequest request) {
+    public ServiceResponse updatePublisher(Long id, CreatePublisherRequest request) {
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Publisher not found: " + id));
 
@@ -99,17 +110,18 @@ public class PublisherServiceImpl implements IPublisherService {
         Publisher saved = publisherRepository.save(publisher);
         log.info("Publisher updated: {}", saved.getName());
 
-        return mapToDTO(saved);
+        return ServiceResponse.RESPONSE_SUCCESS("Publisher updated successfully", mapToDTO(saved));
     }
 
     @Override
     @Transactional
-    public void deletePublisher(Long id) {
+    public ServiceResponse deletePublisher(Long id) {
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Publisher not found: " + id));
 
         publisherRepository.delete(publisher);
         log.info("Publisher deleted: {}", id);
+        return ServiceResponse.RESPONSE_SUCCESS("Publisher deleted successfully", null);
     }
 
     private String generateSlug(String name) {

@@ -1,8 +1,7 @@
 package com.bookstore.product.controller;
 
-import com.bookstore.common.dto.ApiResponse;
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.product.dto.request.CreateCategoryRequest;
-import com.bookstore.product.dto.category.CategoryDTO;
 import com.bookstore.product.service.ICategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
@@ -29,70 +26,60 @@ public class CategoryController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new category (Admin)", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(
+    public ResponseEntity<ServiceResponse> createCategory(
             @Valid @RequestBody CreateCategoryRequest request) {
-        CategoryDTO category = categoryService.createCategory(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Category created successfully", category));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(request));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get category by ID")
-    public ResponseEntity<ApiResponse<CategoryDTO>> getCategoryById(@PathVariable Long id) {
-        CategoryDTO category = categoryService.getCategoryById(id);
-        return ResponseEntity.ok(ApiResponse.success(category));
+    public ResponseEntity<ServiceResponse> getCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
     @GetMapping("/slug/{slug}")
     @Operation(summary = "Get category by slug")
-    public ResponseEntity<ApiResponse<CategoryDTO>> getCategoryBySlug(@PathVariable String slug) {
-        CategoryDTO category = categoryService.getCategoryBySlug(slug);
-        return ResponseEntity.ok(ApiResponse.success(category));
+    public ResponseEntity<ServiceResponse> getCategoryBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(categoryService.getCategoryBySlug(slug));
     }
 
     @GetMapping
     @Operation(summary = "Get all active categories")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories() {
-        List<CategoryDTO> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(ApiResponse.success(categories));
+    public ResponseEntity<ServiceResponse> getAllCategories() {
+        return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     @GetMapping("/root")
     @Operation(summary = "Get root categories (no parent)")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getRootCategories() {
-        List<CategoryDTO> categories = categoryService.getRootCategories();
-        return ResponseEntity.ok(ApiResponse.success(categories));
+    public ResponseEntity<ServiceResponse> getRootCategories() {
+        return ResponseEntity.ok(categoryService.getRootCategories());
     }
 
     @GetMapping("/{parentId}/children")
     @Operation(summary = "Get child categories of a parent")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getChildCategories(@PathVariable Long parentId) {
-        List<CategoryDTO> categories = categoryService.getChildCategories(parentId);
-        return ResponseEntity.ok(ApiResponse.success(categories));
+    public ResponseEntity<ServiceResponse> getChildCategories(@PathVariable Long parentId) {
+        return ResponseEntity.ok(categoryService.getChildCategories(parentId));
     }
 
     @GetMapping("/tree")
     @Operation(summary = "Get category tree (hierarchical)")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getCategoryTree() {
-        List<CategoryDTO> tree = categoryService.getCategoryTree();
-        return ResponseEntity.ok(ApiResponse.success(tree));
+    public ResponseEntity<ServiceResponse> getCategoryTree() {
+        return ResponseEntity.ok(categoryService.getCategoryTree());
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update category (Admin only)", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(
+    public ResponseEntity<ServiceResponse> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CreateCategoryRequest request) {
-        CategoryDTO category = categoryService.updateCategory(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Category updated successfully", category));
+        return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete category (Admin only)", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
-        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
+    public ResponseEntity<ServiceResponse> deleteCategory(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.deleteCategory(id));
     }
 }

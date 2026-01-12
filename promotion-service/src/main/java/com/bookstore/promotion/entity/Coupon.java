@@ -30,7 +30,7 @@ public class Coupon {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String code; // e.g., SALE50, NEWYEAR2026
+    private String code;
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -43,19 +43,17 @@ public class Coupon {
     private DiscountType discountType;
 
     @Column(name = "discount_value", nullable = false, precision = 12, scale = 2)
-    private BigDecimal discountValue; // Percentage (0-100) or fixed amount
+    private BigDecimal discountValue;
 
-    // Limits
     @Column(name = "minimum_order_amount", precision = 12, scale = 2)
     @Builder.Default
     private BigDecimal minimumOrderAmount = BigDecimal.ZERO;
 
     @Column(name = "maximum_discount_amount", precision = 12, scale = 2)
-    private BigDecimal maximumDiscountAmount; // Cap for percentage discounts
+    private BigDecimal maximumDiscountAmount;
 
-    // Usage limits
     @Column(name = "usage_limit")
-    private Integer usageLimit; // Total uses allowed (NULL = unlimited)
+    private Integer usageLimit;
 
     @Column(name = "usage_limit_per_user")
     @Builder.Default
@@ -63,9 +61,8 @@ public class Coupon {
 
     @Column(name = "usage_count")
     @Builder.Default
-    private Integer usageCount = 0; // Current usage count
+    private Integer usageCount = 0;
 
-    // Validity
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
 
@@ -76,7 +73,6 @@ public class Coupon {
     @Builder.Default
     private Boolean isActive = true;
 
-    // Targeting
     @Enumerated(EnumType.STRING)
     @Column(name = "applies_to")
     @Builder.Default
@@ -87,7 +83,6 @@ public class Coupon {
     @Builder.Default
     private UserType userType = UserType.ALL;
 
-    // Relationships
     @ElementCollection
     @CollectionTable(name = "coupon_products", joinColumns = @JoinColumn(name = "coupon_id"))
     @Column(name = "product_id")
@@ -135,7 +130,6 @@ public class Coupon {
         SPECIFIC_USERS // Users cụ thể
     }
 
-    // Helper methods
     public boolean isValid() {
         LocalDateTime now = LocalDateTime.now();
         return isActive &&
@@ -176,12 +170,12 @@ public class Coupon {
                 discount = discountValue;
                 break;
             case FREE_SHIPPING:
-                discount = BigDecimal.ZERO; // Handled separately
+                discount = BigDecimal.ZERO;
                 break;
             default:
                 discount = BigDecimal.ZERO;
         }
-        return discount.min(orderAmount); // Cannot discount more than order amount
+        return discount.min(orderAmount);
     }
 
     public boolean isApplicableToProduct(Long productId) {
@@ -189,6 +183,6 @@ public class Coupon {
         if (appliesTo == AppliesTo.SPECIFIC_PRODUCTS) {
             return applicableProductIds.contains(productId);
         }
-        return false; // Category check needs to be done in service
+        return false;
     }
 }

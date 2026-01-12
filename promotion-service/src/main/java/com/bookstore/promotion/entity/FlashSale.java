@@ -69,7 +69,6 @@ public class FlashSale {
         ENDED      // Đã kết thúc
     }
 
-    // Helper methods
     public void addProduct(FlashSaleProduct product) {
         products.add(product);
         product.setFlashSale(this);

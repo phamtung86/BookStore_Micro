@@ -36,7 +36,7 @@ public class Inventory {
     private Warehouse warehouse;
 
     @Column(nullable = false, length = 50)
-    private String sku;
+    private String sku; 
 
     @Column(nullable = false)
     @Builder.Default

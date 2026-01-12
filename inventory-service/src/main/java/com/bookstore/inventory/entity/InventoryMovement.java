@@ -55,7 +55,7 @@ public class InventoryMovement {
     private String referenceType; // ORDER, PURCHASE, ADJUSTMENT, TRANSFER
 
     @Column(name = "reference_id", length = 50)
-    private String referenceId; // Order ID, PO number,
+    private String referenceId; 
 
     @Column(length = 255)
     private String reason;

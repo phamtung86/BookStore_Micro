@@ -59,7 +59,7 @@ public class StockReservation {
         PENDING, // Đang giữ hàng
         CONFIRMED, // Đã xác nhận (thanh toán thành công)
         RELEASED, // Đã giải phóng (hết hạn hoặc hủy)
-        CANCELLED // Đã hủy bởi user
+        EXPIRED, CANCELLED // Đã hủy bởi user
     }
 
     public boolean isExpired() {

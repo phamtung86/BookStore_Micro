@@ -78,7 +78,7 @@ public class Notification {
         SENT, // Đã gửi
         DELIVERED, // Đã gửi thành công
         FAILED, // Gửi thất bại
-        READ // Đã đọc (for in-app)
+        READ // Đã đọc
     }
 
     public void markAsSent() {

@@ -35,13 +35,13 @@ public class ProductReview {
     private Product product;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId; // Reference to identity_db.users
+    private Long userId; 
 
     @Column(name = "order_item_id")
-    private Long orderItemId; // Reference to order_db.order_items (for verified purchase)
+    private Long orderItemId; 
 
     @Column(nullable = false)
-    private Integer rating; // 1-5
+    private Integer rating; 
 
     @Column(length = 255)
     private String title;
@@ -50,10 +50,10 @@ public class ProductReview {
     private String content;
 
     @Column(columnDefinition = "TEXT")
-    private String pros; // What user liked
+    private String pros; 
 
     @Column(columnDefinition = "TEXT")
-    private String cons; // What user disliked
+    private String cons; 
 
     @Column(name = "is_verified_purchase")
     @Builder.Default
@@ -67,11 +67,6 @@ public class ProductReview {
     @Builder.Default
     private Integer helpfulCount = 0;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    @ToString.Exclude
-    private List<ProductReviewImage> images = new ArrayList<>();
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -80,11 +75,7 @@ public class ProductReview {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Helper methods
-    public void addImage(ProductReviewImage image) {
-        images.add(image);
-        image.setReview(this);
-    }
+
 
     public void incrementHelpful() {
         this.helpfulCount++;

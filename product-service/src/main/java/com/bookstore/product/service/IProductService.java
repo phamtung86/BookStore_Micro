@@ -1,29 +1,28 @@
 package com.bookstore.product.service;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.product.dto.request.CreateProductRequest;
-import com.bookstore.product.dto.product.ProductDTO;
+import com.bookstore.product.dto.request.UpdateProductRequest;
 import com.bookstore.product.dto.request.ProductSearchCriteria;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IProductService {
 
-    ProductDTO createProduct(CreateProductRequest request, Long sellerId, String sellerName);
+    ServiceResponse createProduct(CreateProductRequest request, Long sellerId);
 
-    ProductDTO getProductById(Long id);
+    ServiceResponse updateProduct(Long id, UpdateProductRequest request, Long userId, boolean isAdmin);
 
-    ProductDTO getProductBySlug(String slug);
+    ServiceResponse getProductById(Long id);
 
-    Page<ProductDTO> getProductsBySeller(Long sellerId, Pageable pageable);
+    ServiceResponse getProductBySlug(String slug);
 
-    Page<ProductDTO> getMyProducts(Long sellerId, Pageable pageable);
+    ServiceResponse getProductsBySeller(Long sellerId, Pageable pageable);
 
-    Page<ProductDTO> searchProducts(String keyword, Pageable pageable);
+    ServiceResponse getMyProducts(Long sellerId, Pageable pageable);
 
-    Page<ProductDTO> searchProducts(ProductSearchCriteria criteria,
-                                    Pageable pageable);
+    ServiceResponse searchProducts(ProductSearchCriteria criteria, Pageable pageable);
 
-    Page<ProductDTO> getProductsByCategory(Long categoryId, Pageable pageable);
+    ServiceResponse getProductsByCategory(Long categoryId, Pageable pageable);
 
-    void deleteProduct(Long id, Long userId, boolean isAdmin);
+    ServiceResponse deleteProduct(Long id, Long userId, boolean isAdmin);
 }

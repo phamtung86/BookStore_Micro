@@ -82,16 +82,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.bookstore</groupId>
-            <artifactId>identity-service</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
+
         <!-- RabbitMQ for Async Processing (File Upload) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!--        Redis-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
     </dependencies>
 

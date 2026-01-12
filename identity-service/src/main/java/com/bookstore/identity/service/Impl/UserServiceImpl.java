@@ -1,5 +1,6 @@
 package com.bookstore.identity.service.Impl;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.common.exception.BusinessException;
 import com.bookstore.identity.config.RolePermissionConfig;
 import com.bookstore.identity.dto.UserDTO;
@@ -25,36 +26,38 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
+    public ServiceResponse getAllUsers() {
+        List<UserDTO> users = userRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+        return ServiceResponse.RESPONSE_SUCCESS("Users retrieved successfully", users);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserDTO getUserById(Long id) {
+    public ServiceResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("User not found"));
-        return mapToDTO(user);
+        return ServiceResponse.RESPONSE_SUCCESS("User retrieved successfully", mapToDTO(user));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserDTO getMyProfile() {
+    public ServiceResponse getMyProfile() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException("User not found"));
-        return mapToDTO(user);
+        return ServiceResponse.RESPONSE_SUCCESS("Profile retrieved successfully", mapToDTO(user));
     }
 
     @Override
     @Transactional
-    public void deleteUser(Long id) {
+    public ServiceResponse deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new BusinessException("User not found");
         }
         userRepository.deleteById(id);
+        return ServiceResponse.RESPONSE_SUCCESS("User deleted successfully", null);
     }
 
     private UserDTO mapToDTO(User user) {

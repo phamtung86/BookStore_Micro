@@ -1,27 +1,33 @@
 package com.bookstore.product.service;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.product.dto.request.CreateCategoryRequest;
-import com.bookstore.product.dto.category.CategoryDTO;
+import com.bookstore.product.entity.Category;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface ICategoryService {
 
-    CategoryDTO createCategory(CreateCategoryRequest request);
+    ServiceResponse createCategory(CreateCategoryRequest request);
 
-    CategoryDTO getCategoryById(Long id);
+    ServiceResponse getCategoryById(Long id);
 
-    CategoryDTO getCategoryBySlug(String slug);
+    /**
+     * Get category entity by ID (for internal service use)
+     */
+    Optional<Category> findById(Long id);
 
-    List<CategoryDTO> getAllCategories();
+    ServiceResponse getCategoryBySlug(String slug);
 
-    List<CategoryDTO> getRootCategories();
+    ServiceResponse getAllCategories();
 
-    List<CategoryDTO> getChildCategories(Long parentId);
+    ServiceResponse getRootCategories();
 
-    CategoryDTO updateCategory(Long id, CreateCategoryRequest request);
+    ServiceResponse getChildCategories(Long parentId);
 
-    void deleteCategory(Long id);
+    ServiceResponse updateCategory(Long id, CreateCategoryRequest request);
 
-    List<CategoryDTO> getCategoryTree();
+    ServiceResponse deleteCategory(Long id);
+
+    ServiceResponse getCategoryTree();
 }

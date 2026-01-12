@@ -1,5 +1,6 @@
 package com.bookstore.identity.service.Impl;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.common.exception.BusinessException;
 import com.bookstore.identity.config.RolePermissionConfig;
 import com.bookstore.identity.dto.LoginRequest;
@@ -33,10 +34,9 @@ public class AuthService implements IAuthService {
     private final PasswordEncoder passwordEncoder;
     private final IJwtService jwtService;
 
-
     @Override
     @Transactional
-    public UserDTO register(RegisterRequest request) {
+    public ServiceResponse register(RegisterRequest request) {
         log.info("Registering new user: {}", request.getUsername());
 
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -57,12 +57,12 @@ public class AuthService implements IAuthService {
                 .build();
 
         User savedUser = userRepository.save(user);
-        return mapToDTO(savedUser);
+        return ServiceResponse.RESPONSE_SUCCESS("User registered successfully", mapToDTO(savedUser));
     }
 
     @Override
     @Transactional
-    public LoginResponse login(LoginRequest request, HttpServletRequest httpRequest) {
+    public ServiceResponse login(LoginRequest request, HttpServletRequest httpRequest) {
         log.info("Login attempt for user: {}", request.getUsername());
 
         String ipAddress = extractIpAddress(httpRequest);
@@ -104,7 +104,7 @@ public class AuthService implements IAuthService {
 
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
-        return LoginResponse.builder()
+        LoginResponse loginResponse = LoginResponse.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)
                 .type("Bearer")
@@ -114,6 +114,8 @@ public class AuthService implements IAuthService {
                 .role(user.getRole().name())
                 .expiresIn(jwtService.getAccessTokenExpirationInSeconds())
                 .build();
+
+        return ServiceResponse.RESPONSE_SUCCESS("Login successful", loginResponse);
     }
 
     private String extractIpAddress(HttpServletRequest request) {
@@ -136,10 +138,9 @@ public class AuthService implements IAuthService {
         return request.getRemoteAddr();
     }
 
-
     @Override
     @Transactional(readOnly = true)
-    public LoginResponse refreshToken(String refreshToken) {
+    public ServiceResponse refreshToken(String refreshToken) {
 
         try {
             String username = jwtService.extractUsername(refreshToken);
@@ -173,7 +174,7 @@ public class AuthService implements IAuthService {
 
             String newRefreshToken = jwtService.generateRefreshToken(user.getUsername());
 
-            return LoginResponse.builder()
+            LoginResponse loginResponse = LoginResponse.builder()
                     .token(newAccessToken)
                     .refreshToken(newRefreshToken)
                     .type("Bearer")
@@ -183,6 +184,8 @@ public class AuthService implements IAuthService {
                     .role(user.getRole().name())
                     .expiresIn(jwtService.getAccessTokenExpirationInSeconds())
                     .build();
+
+            return ServiceResponse.RESPONSE_SUCCESS("Token refreshed successfully", loginResponse);
 
         } catch (Exception e) {
             log.error("Error refreshing token: {}", e.getMessage());

@@ -32,10 +32,10 @@ public class CouponUsage {
     private Coupon coupon;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId; // Reference to identity_db.users
+    private Long userId;
 
     @Column(name = "order_id", nullable = false)
-    private Long orderId; // Reference to order_db.orders
+    private Long orderId;
 
     @Column(name = "discount_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal discountAmount;

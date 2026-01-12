@@ -2,8 +2,11 @@ package com.bookstore.product.listener;
 
 import com.bookstore.common.messaging.FileUploadResult;
 import com.bookstore.common.messaging.RabbitMQConstants;
+import com.bookstore.product.dto.productImage.ProductImageDTO;
 import com.bookstore.product.entity.Product;
+import com.bookstore.product.entity.ProductImage;
 import com.bookstore.product.repository.ProductRepository;
+import com.bookstore.product.service.IProductImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -15,13 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bookstore.product.repository.ProductImageRepository; // Add import (manual handling in replacement)
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ProductUploadListener {
 
     private final ProductRepository productRepository;
-    private final ProductImageRepository productImageRepository;
+    private final IProductImageService iProductImageService;
 
     @RabbitListener(bindings = @QueueBinding(value = @Queue(value = RabbitMQConstants.FILE_UPLOAD_RESULT_QUEUE, durable = "true"), exchange = @Exchange(value = RabbitMQConstants.FILE_EXCHANGE), key = RabbitMQConstants.FILE_UPLOAD_RESULT_ROUTING_KEY))
     @Transactional
@@ -35,15 +40,9 @@ public class ProductUploadListener {
             try {
                 Product productRef = productRepository.getReferenceById(result.getEntityId());
 
-                com.bookstore.product.entity.ProductImage image = com.bookstore.product.entity.ProductImage.builder()
-                        .product(productRef)
-                        .imageUrl(result.getFileUrl())
-                        .isPrimary(true)
-                        .displayOrder(0)
-                        .createdAt(java.time.LocalDateTime.now())
-                        .build();
+                ProductImageDTO productImageDTO = new ProductImageDTO(null, result.getFileUrl(), "", 0);
 
-                productImageRepository.save(image);
+                iProductImageService.addProductImage(productRef.getId(),productImageDTO);
 
                 productRepository.updateProductImageAndStatus(
                         result.getEntityId(),

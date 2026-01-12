@@ -56,7 +56,7 @@ public class Refund {
     private String gatewayResponseCode;
 
     @Column(name = "processed_by")
-    private Long processedBy; // Admin user ID
+    private Long processedBy;
 
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
@@ -73,11 +73,11 @@ public class Refund {
     private LocalDateTime updatedAt;
 
     public enum RefundStatus {
-        PENDING,    // Waiting to process
-        PROCESSING, // Being processed
-        COMPLETED,  // Refund successful
-        FAILED,     // Refund failed
-        REJECTED    // Refund rejected by admin
+        PENDING,
+        PROCESSING,
+        COMPLETED,
+        FAILED,
+        REJECTED
     }
 
     public void approve(Long processedBy) {

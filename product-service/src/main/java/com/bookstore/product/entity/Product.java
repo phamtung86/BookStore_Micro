@@ -64,7 +64,6 @@ public class Product {
     @Builder.Default
     private BigDecimal discountPercent = BigDecimal.ZERO;
 
-    // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
@@ -96,7 +95,6 @@ public class Product {
     @ToString.Exclude
     private List<ProductReview> reviews = new ArrayList<>();
 
-    // Book specific
     @Column(name = "publication_date")
     private LocalDate publicationDate;
 
@@ -172,8 +170,24 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Soft delete fields
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "deleted_by")
+    private Long deletedBy;
+
+    // Display visibility
+    @Column(name = "is_visible")
+    @Builder.Default
+    private Boolean isVisible = true;
+
     public enum ProductStatus {
-        PENDING,ACTIVE, INACTIVE, OUT_OF_STOCK, DISCONTINUED, REJECTED
+        PENDING, ACTIVE, INACTIVE, OUT_OF_STOCK, DISCONTINUED, REJECTED
     }
 
     public enum CoverType {

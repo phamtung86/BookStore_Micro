@@ -7,6 +7,7 @@ spring:
     username: ${MYSQL_USER:root}
     password: ${MYSQL_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,7 +16,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
-  
+
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: 5672
@@ -25,10 +26,23 @@ spring:
       simple:
         retry:
           enabled: true
-          initial-interval: 3000ms # Đợi 3 giây rồi thử lại
-          max-attempts: 3           # Thử tối đa 3 lần
-          multiplier: 2.0          # Lần sau đợi lâu gấp đôi lần trước (3s, 6s, 12s)
+          initial-interval: 3000ms
+          max-attempts: 3
+          multiplier: 2.0
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: PT1M
+      cache-null-values: false
+      key-prefix: "book_store:"
+      use-key-prefix: true
   servlet:
     multipart:
       enabled: true

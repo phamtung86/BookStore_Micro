@@ -7,7 +7,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +17,6 @@ import java.util.List;
         @Index(name = "idx_orders_user", columnList = "user_id"),
         @Index(name = "idx_orders_status", columnList = "status"),
         @Index(name = "idx_orders_payment_status", columnList = "payment_status"),
-        @Index(name = "idx_orders_created", columnList = "created_at"),
-        @Index(name = "idx_orders_tracking", columnList = "tracking_number")
 })
 @EntityListeners(AuditingEntityListener.class)
 @Data
@@ -80,35 +77,11 @@ public class Order {
     @Column(name = "shipping_province", nullable = false, length = 100)
     private String shippingProvince;
 
-    @Column(name = "shipping_district", nullable = false, length = 100)
-    private String shippingDistrict;
-
     @Column(name = "shipping_ward", length = 100)
     private String shippingWard;
 
     @Column(name = "shipping_address", nullable = false, length = 255)
     private String shippingAddress;
-
-    @Column(name = "shipping_postal_code", length = 20)
-    private String shippingPostalCode;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "shipping_method")
-    @Builder.Default
-    private ShippingMethod shippingMethod = ShippingMethod.STANDARD;
-
-    @Column(name = "shipping_carrier", length = 100)
-    private String shippingCarrier;
-
-    @Column(name = "tracking_number", length = 100)
-    private String trackingNumber;
-
-    @Column(name = "estimated_delivery_date")
-    private LocalDate estimatedDeliveryDate;
-
-    @Column(name = "actual_delivery_date")
-    private LocalDate actualDeliveryDate;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
@@ -167,12 +140,6 @@ public class Order {
         REFUNDED // Hoàn tiền
     }
 
-    public enum ShippingMethod {
-        STANDARD, // Giao hàng tiêu chuẩn (3-5 ngày)
-        EXPRESS, // Giao hàng nhanh (1-2 ngày)
-        SAME_DAY // Giao trong ngày
-    }
-
     public enum PaymentMethod {
         COD, // Thanh toán khi nhận hàng
         BANK_TRANSFER, // Chuyển khoản ngân hàng
@@ -190,7 +157,6 @@ public class Order {
         PARTIAL_REFUND // Hoàn tiền một phần
     }
 
-    // Helper methods
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
@@ -208,6 +174,7 @@ public class Order {
                 .toStatus(toStatus.name())
                 .notes(notes)
                 .changedBy(changedBy)
+                .createdAt(LocalDateTime.now())
                 .build();
         statusHistory.add(history);
     }
@@ -250,7 +217,6 @@ public class Order {
         sb.append(shippingAddress);
         if (shippingWard != null)
             sb.append(", ").append(shippingWard);
-        sb.append(", ").append(shippingDistrict);
         sb.append(", ").append(shippingProvince);
         return sb.toString();
     }

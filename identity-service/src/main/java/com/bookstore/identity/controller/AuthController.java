@@ -1,6 +1,6 @@
 package com.bookstore.identity.controller;
 
-import com.bookstore.common.dto.ApiResponse;
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.identity.dto.*;
 import com.bookstore.identity.service.IAuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,26 +24,23 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register new user")
-    public ResponseEntity<ApiResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest request) {
-        UserDTO user = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("User registered successfully", user));
+    public ResponseEntity<ServiceResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Login user")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(
+    public ResponseEntity<ServiceResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest) {
-        LoginResponse response = authService.login(request, httpRequest);
-        return ResponseEntity.ok(ApiResponse.success("Login successful", response));
+        return ResponseEntity.ok(authService.login(request, httpRequest));
     }
 
     @PostMapping("/refresh")
     @Operation(summary = "Refresh access token")
-    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        LoginResponse response = authService.refreshToken(request.getRefreshToken());
-        return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
+    public ResponseEntity<ServiceResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request.getRefreshToken()));
     }
 
     @GetMapping("/health")

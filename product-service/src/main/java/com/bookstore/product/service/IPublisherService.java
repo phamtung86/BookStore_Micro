@@ -1,23 +1,30 @@
 package com.bookstore.product.service;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.product.dto.request.CreatePublisherRequest;
-import com.bookstore.product.dto.publisher.PublisherDTO;
-import org.springframework.data.domain.Page;
+import com.bookstore.product.entity.Publisher;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
 
 public interface IPublisherService {
 
-    PublisherDTO createPublisher(CreatePublisherRequest request);
+    ServiceResponse createPublisher(CreatePublisherRequest request);
 
-    PublisherDTO getPublisherById(Long id);
+    ServiceResponse getPublisherById(Long id);
 
-    PublisherDTO getPublisherBySlug(String slug);
+    /**
+     * Get publisher entity by ID (for internal service use)
+     */
+    Optional<Publisher> findById(Long id);
 
-    Page<PublisherDTO> getAllPublishers(Pageable pageable);
+    ServiceResponse getPublisherBySlug(String slug);
 
-    Page<PublisherDTO> searchPublishers(String keyword, Pageable pageable);
+    ServiceResponse getAllPublishers(Pageable pageable);
 
-    PublisherDTO updatePublisher(Long id, CreatePublisherRequest request);
+    ServiceResponse searchPublishers(String keyword, Pageable pageable);
 
-    void deletePublisher(Long id);
+    ServiceResponse updatePublisher(Long id, CreatePublisherRequest request);
+
+    ServiceResponse deletePublisher(Long id);
 }

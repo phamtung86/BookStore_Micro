@@ -2,6 +2,13 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+  codec:
+    max-in-memory-size: 50MB
   cloud:
     gateway:
       discovery:
@@ -9,10 +16,7 @@ spring:
           enabled: false
           lower-case-service-id: true
       routes:
-        # ========================================
-        # PUBLIC ROUTES (No Authentication Required)
-        # ========================================
-        
+
         # Auth endpoints - Login, Register, Refresh Token
         - id: identity-auth-public
           uri: lb://IDENTITY-SERVICE
@@ -21,7 +25,7 @@ spring:
           filters:
             - StripPrefix=2
 
-        # Public product catalog (for browsing)
+        # Public product catalog
         - id: product-public
           uri: lb://PRODUCT-SERVICE
           predicates:
@@ -90,6 +94,15 @@ spring:
           uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/api/v1/notifications/**
+          filters:
+            - StripPrefix=2
+            - AuthenticationFilter
+
+        # Saga Service - Distributed Transaction Orchestration
+        - id: saga-service
+          uri: lb://SAGA-SERVICE
+          predicates:
+            - Path=/api/v1/saga/**
           filters:
             - StripPrefix=2
             - AuthenticationFilter

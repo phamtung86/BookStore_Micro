@@ -1,5 +1,6 @@
 package com.bookstore.product.service.impl;
 
+import com.bookstore.common.dto.response.ServiceResponse;
 import com.bookstore.common.exception.BusinessException;
 import com.bookstore.product.dto.request.CreateCategoryRequest;
 import com.bookstore.product.dto.category.CategoryDTO;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,10 +28,14 @@ public class CategoryServiceImpl implements ICategoryService {
     private final ProductRepository productRepository;
 
     @Override
-    @Transactional
-    public CategoryDTO createCategory(CreateCategoryRequest request) {
-        log.info("Creating category: {}", request.getName());
+    @Transactional(readOnly = true)
+    public Optional<Category> findById(Long id) {
+        return categoryRepository.findById(id);
+    }
 
+    @Override
+    @Transactional
+    public ServiceResponse createCategory(CreateCategoryRequest request) {
         if (categoryRepository.existsByName(request.getName())) {
             throw new BusinessException("Category name already exists: " + request.getName());
         }
@@ -56,55 +62,58 @@ public class CategoryServiceImpl implements ICategoryService {
                 .build();
 
         Category saved = categoryRepository.save(category);
-        return mapToDTO(saved, parent);
+        return ServiceResponse.RESPONSE_SUCCESS("Category created successfully", mapToDTO(saved, parent));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryDTO getCategoryById(Long id) {
+    public ServiceResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Category not found: " + id));
-        return mapToDTO(category, getParent(category));
+        return ServiceResponse.RESPONSE_SUCCESS(mapToDTO(category, getParent(category)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryDTO getCategoryBySlug(String slug) {
+    public ServiceResponse getCategoryBySlug(String slug) {
         Category category = categoryRepository.findBySlug(slug)
                 .orElseThrow(() -> new BusinessException("Category not found: " + slug));
-        return mapToDTO(category, getParent(category));
+        return ServiceResponse.RESPONSE_SUCCESS(mapToDTO(category, getParent(category)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryDTO> getAllCategories() {
-        return categoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc()
+    public ServiceResponse getAllCategories() {
+        List<CategoryDTO> categories = categoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc()
                 .stream()
                 .map(c -> mapToDTO(c, getParent(c)))
                 .collect(Collectors.toList());
+        return ServiceResponse.RESPONSE_SUCCESS(categories);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryDTO> getRootCategories() {
-        return categoryRepository.findByParentIsNullOrderByDisplayOrderAsc()
+    public ServiceResponse getRootCategories() {
+        List<CategoryDTO> categories = categoryRepository.findByParentIsNullOrderByDisplayOrderAsc()
                 .stream()
                 .map(c -> mapToDTO(c, null))
                 .collect(Collectors.toList());
+        return ServiceResponse.RESPONSE_SUCCESS(categories);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryDTO> getChildCategories(Long parentId) {
-        return categoryRepository.findByParentIdOrderByDisplayOrderAsc(parentId)
+    public ServiceResponse getChildCategories(Long parentId) {
+        List<CategoryDTO> categories = categoryRepository.findByParentIdOrderByDisplayOrderAsc(parentId)
                 .stream()
                 .map(c -> mapToDTO(c, getParent(c)))
                 .collect(Collectors.toList());
+        return ServiceResponse.RESPONSE_SUCCESS(categories);
     }
 
     @Override
     @Transactional
-    public CategoryDTO updateCategory(Long id, CreateCategoryRequest request) {
+    public ServiceResponse updateCategory(Long id, CreateCategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Category not found: " + id));
 
@@ -127,12 +136,12 @@ public class CategoryServiceImpl implements ICategoryService {
         }
 
         Category saved = categoryRepository.save(category);
-        return mapToDTO(saved, getParent(saved));
+        return ServiceResponse.RESPONSE_SUCCESS("Category updated successfully", mapToDTO(saved, getParent(saved)));
     }
 
     @Override
     @Transactional
-    public void deleteCategory(Long id) {
+    public ServiceResponse deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Category not found: " + id));
 
@@ -143,15 +152,17 @@ public class CategoryServiceImpl implements ICategoryService {
 
         category.setIsActive(false);
         categoryRepository.save(category);
+        return ServiceResponse.RESPONSE_SUCCESS("Category deleted successfully", null);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryDTO> getCategoryTree() {
+    public ServiceResponse getCategoryTree() {
         List<Category> rootCategories = categoryRepository.findByParentIsNullOrderByDisplayOrderAsc();
-        return rootCategories.stream()
+        List<CategoryDTO> tree = rootCategories.stream()
                 .map(this::mapToDTOWithChildren)
                 .collect(Collectors.toList());
+        return ServiceResponse.RESPONSE_SUCCESS(tree);
     }
 
     private CategoryDTO mapToDTOWithChildren(Category category) {

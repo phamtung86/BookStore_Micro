@@ -52,6 +52,7 @@ public class CartItem {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Helper methods
     @PrePersist
     @PreUpdate
     private void calculateSubtotal() {
