@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-/**
- * Command to process payment for an order
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * Event sent by payment service after payment processing attempt
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

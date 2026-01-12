@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * Event sent when order saga completes (success or failure)
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

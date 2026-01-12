@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * Event for saga compensation results
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

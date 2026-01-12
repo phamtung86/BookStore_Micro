@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * Command to release previously reserved stock
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

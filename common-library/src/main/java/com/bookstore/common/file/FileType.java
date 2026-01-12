@@ -15,7 +15,4 @@ public enum FileType {
         this.bucketName = bucketName;
     }
 
-    public String getBucketName() {
-        return bucketName;
-    }
 }

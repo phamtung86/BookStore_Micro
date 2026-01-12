@@ -9,9 +9,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Event to start a new order saga
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

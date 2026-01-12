@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * Event sent by inventory service after stock reservation attempt
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

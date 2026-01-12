@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * Command to reserve stock for an order
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

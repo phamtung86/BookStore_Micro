@@ -67,7 +67,7 @@ public class VNPayServiceImpl implements IVNPayService {
         StringBuilder hashData = new StringBuilder();
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (query.length() > 0) {
+            if (!query.isEmpty()) {
                 query.append("&");
                 hashData.append("&");
             }
@@ -82,8 +82,7 @@ public class VNPayServiceImpl implements IVNPayService {
         String secureHash = hmacSHA512(vnPayConfig.getHashSecret(), hashData.toString());
         query.append("&vnp_SecureHash=").append(secureHash);
 
-        String paymentUrl = vnPayConfig.getPayUrl() + "?" + query;
-        return paymentUrl;
+        return vnPayConfig.getPayUrl() + "?" + query;
     }
 
     @Override
@@ -146,7 +145,6 @@ public class VNPayServiceImpl implements IVNPayService {
                     .build();
             orderClient.cancelOrder(cancelOrderMessage);
         }
-
         paymentRepository.save(payment);
         return response;
     }
@@ -161,12 +159,12 @@ public class VNPayServiceImpl implements IVNPayService {
 
     private String generateTxnRef(Long orderId) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        return "BO"+orderId + "_" + timestamp;
+        return "BO_"+orderId + "_" + timestamp;
     }
 
     private Long extractOrderId(String txnRef) {
         try {
-            return Long.parseLong(txnRef.split("_")[0]);
+            return Long.parseLong(txnRef.split("_")[1]);
         } catch (Exception e) {
             throw new BusinessException("Invalid txnRef format: " + txnRef);
         }
@@ -178,7 +176,7 @@ public class VNPayServiceImpl implements IVNPayService {
 
         for (Map.Entry<String, String> entry : sortedParams.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                if (hashData.length() > 0) {
+                if (!hashData.isEmpty()) {
                     hashData.append("&");
                 }
                 hashData.append(entry.getKey())
